@@ -18,31 +18,6 @@ import { Vector2D } from './core/Vector2D';
 const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
 
-// 響應式 Canvas 尺寸
-function resizeCanvas(): void {
-  const maxWidth = 800;
-  const maxHeight = 500;
-  const aspectRatio = maxWidth / maxHeight;
-
-  // 取得可用寬度（扣除 padding）
-  const availableWidth = Math.min(window.innerWidth - 40, maxWidth);
-  const availableHeight = availableWidth / aspectRatio;
-
-  canvas.width = availableWidth;
-  canvas.height = availableHeight;
-
-  // 重新繪製
-  if (currentTrack || gameState.getState() === State.EDITING) {
-    render();
-  } else {
-    renderWelcome();
-  }
-}
-
-// 初始設定與監聽視窗變化
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-
 // 核心系統
 const gameState = new GameState();
 const physics = new Physics();
@@ -67,6 +42,27 @@ let inLoop = false;
 // 停止檢測
 let stoppedFrames = 0;
 const STOPPED_THRESHOLD = 60; // 停止 1 秒後結束
+
+// 響應式 Canvas 尺寸
+function resizeCanvas(): void {
+  const maxWidth = 800;
+  const maxHeight = 500;
+  const aspectRatio = maxWidth / maxHeight;
+
+  // 取得可用寬度（扣除 padding）
+  const availableWidth = Math.min(window.innerWidth - 40, maxWidth);
+  const availableHeight = availableWidth / aspectRatio;
+
+  canvas.width = availableWidth;
+  canvas.height = availableHeight;
+
+  // 重新繪製（只在已初始化後）
+  if (currentTrack || gameState.getState() === State.EDITING) {
+    render();
+  } else if (gameState.getState() === State.SELECTING) {
+    renderWelcome();
+  }
+}
 
 /**
  * 初始化遊戲
@@ -154,6 +150,10 @@ function init(): void {
 
   // 啟動引擎
   engine.start();
+
+  // 響應式尺寸
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 
   // 初始畫面
   renderWelcome();
@@ -349,6 +349,10 @@ function render(): void {
   }
 }
 
+// 設計尺寸（用於座標計算）
+const DESIGN_WIDTH = 800;
+const DESIGN_HEIGHT = 500;
+
 /**
  * 繪製歡迎畫面
  */
@@ -358,11 +362,11 @@ function renderWelcome(): void {
   ctx.fillStyle = '#e2e8f0';
   ctx.font = 'bold 28px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('彈珠軌道模擬器', canvas.width / 2, canvas.height / 2 - 20);
+  ctx.fillText('彈珠軌道模擬器', DESIGN_WIDTH / 2, DESIGN_HEIGHT / 2 - 20);
 
   ctx.font = '16px sans-serif';
   ctx.fillStyle = '#94a3b8';
-  ctx.fillText('選擇一個軌道開始模擬', canvas.width / 2, canvas.height / 2 + 15);
+  ctx.fillText('選擇一個軌道開始模擬', DESIGN_WIDTH / 2, DESIGN_HEIGHT / 2 + 15);
 }
 
 /**
@@ -424,7 +428,7 @@ function renderFinishMessage(): void {
   ctx.textAlign = 'center';
 
   const message = success ? '成功！' : '失敗！';
-  ctx.fillText(message, canvas.width / 2, 50);
+  ctx.fillText(message, DESIGN_WIDTH / 2, 50);
 }
 
 // 啟動遊戲

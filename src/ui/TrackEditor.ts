@@ -22,6 +22,9 @@ export class TrackEditor {
   private readonly pointColor = '#4dabf7';
   private readonly lineColor = 'rgba(77, 171, 247, 0.3)';
 
+  // 設計尺寸
+  private readonly designWidth = 800;
+
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
@@ -120,12 +123,13 @@ export class TrackEditor {
   };
 
   /**
-   * 取得滑鼠在 Canvas 上的位置
+   * 取得滑鼠在 Canvas 上的位置（轉換為設計座標）
    */
   private getMousePosition(e: MouseEvent): Vector2D {
     const rect = this.canvas.getBoundingClientRect();
-    const scaleX = this.canvas.width / rect.width;
-    const scaleY = this.canvas.height / rect.height;
+    // 轉換為設計座標（800x500）
+    const scaleX = this.designWidth / rect.width;
+    const scaleY = (this.designWidth / 1.6) / rect.height; // 1.6 = 800/500
     return new Vector2D(
       (e.clientX - rect.left) * scaleX,
       (e.clientY - rect.top) * scaleY
@@ -133,12 +137,13 @@ export class TrackEditor {
   }
 
   /**
-   * 取得觸控在 Canvas 上的位置
+   * 取得觸控在 Canvas 上的位置（轉換為設計座標）
    */
   private getTouchPosition(touch: Touch): Vector2D {
     const rect = this.canvas.getBoundingClientRect();
-    const scaleX = this.canvas.width / rect.width;
-    const scaleY = this.canvas.height / rect.height;
+    // 轉換為設計座標（800x500）
+    const scaleX = this.designWidth / rect.width;
+    const scaleY = (this.designWidth / 1.6) / rect.height;
     return new Vector2D(
       (touch.clientX - rect.left) * scaleX,
       (touch.clientY - rect.top) * scaleY
@@ -270,11 +275,11 @@ export class TrackEditor {
     this.ctx.textAlign = 'center';
 
     if (pointCount === 0) {
-      this.ctx.fillText('點擊畫布新增起點', this.canvas.width / 2, 30);
+      this.ctx.fillText('點擊畫布新增起點', this.designWidth / 2, 30);
     } else if (pointCount === 1) {
-      this.ctx.fillText('繼續點擊新增控制點，右鍵移除', this.canvas.width / 2, 30);
+      this.ctx.fillText('繼續點擊新增控制點', this.designWidth / 2, 30);
     } else {
-      this.ctx.fillText(`已新增 ${pointCount} 個控制點，右鍵移除最後一個`, this.canvas.width / 2, 30);
+      this.ctx.fillText(`已新增 ${pointCount} 個控制點`, this.designWidth / 2, 30);
     }
   }
 

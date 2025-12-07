@@ -16,6 +16,9 @@ export class Renderer {
   private boxRenderer: BoxRenderer;
   private particleSystem: ParticleSystem;
 
+  // 設計尺寸（固定）
+  private readonly designWidth = 800;
+
   constructor(private ctx: CanvasRenderingContext2D) {
     this.trackRenderer = new TrackRenderer(ctx);
     this.marbleRenderer = new MarbleRenderer(ctx);
@@ -24,10 +27,21 @@ export class Renderer {
   }
 
   /**
-   * 清除畫布
+   * 取得縮放比例
+   */
+  getScale(): number {
+    return this.ctx.canvas.width / this.designWidth;
+  }
+
+  /**
+   * 清除畫布並設定縮放
    */
   clear(): void {
     const canvas = this.ctx.canvas;
+    const scale = this.getScale();
+
+    // 重置變換
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     // 繪製背景漸層
     const gradient = this.ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -36,6 +50,9 @@ export class Renderer {
 
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 套用縮放（讓所有繪製都等比例縮小）
+    this.ctx.setTransform(scale, 0, 0, scale, 0, 0);
   }
 
   /**
