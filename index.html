@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>彈珠軌道模擬器</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game-canvas"></canvas>
+    <div id="ui-container">
+      <div id="track-selector">
+        <h2>選擇軌道</h2>
+        <div id="track-options"></div>
+      </div>
+      <div id="controls">
+        <button id="start-btn">開始模擬</button>
+        <button id="reset-btn" style="display: none;">重新選擇</button>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
