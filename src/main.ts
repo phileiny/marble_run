@@ -17,8 +17,31 @@ import { Vector2D } from './core/Vector2D';
 // Canvas 設定
 const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
-canvas.width = 800;
-canvas.height = 500;
+
+// 響應式 Canvas 尺寸
+function resizeCanvas(): void {
+  const maxWidth = 800;
+  const maxHeight = 500;
+  const aspectRatio = maxWidth / maxHeight;
+
+  // 取得可用寬度（扣除 padding）
+  const availableWidth = Math.min(window.innerWidth - 40, maxWidth);
+  const availableHeight = availableWidth / aspectRatio;
+
+  canvas.width = availableWidth;
+  canvas.height = availableHeight;
+
+  // 重新繪製
+  if (currentTrack || gameState.getState() === State.EDITING) {
+    render();
+  } else {
+    renderWelcome();
+  }
+}
+
+// 初始設定與監聽視窗變化
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
 // 核心系統
 const gameState = new GameState();
@@ -94,6 +117,14 @@ function init(): void {
     }
 
     startSimulation();
+  });
+
+  // 撤銷按鈕事件（移除最後一個控制點）
+  controls.onUndo(() => {
+    audioManager.playClick();
+    trackEditor.getTrack().removeLastPoint();
+    renderEditing();
+    controls.setStartEnabled(trackEditor.isValid());
   });
 
   // 重置按鈕事件

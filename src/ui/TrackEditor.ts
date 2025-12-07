@@ -31,14 +31,20 @@ export class TrackEditor {
   }
 
   /**
-   * 設定滑鼠事件
+   * 設定滑鼠與觸控事件
    */
   private setupEvents(): void {
+    // 滑鼠事件
     this.canvas.addEventListener('click', this.handleClick);
     this.canvas.addEventListener('mousedown', this.handleMouseDown);
     this.canvas.addEventListener('mousemove', this.handleMouseMove);
     this.canvas.addEventListener('mouseup', this.handleMouseUp);
     this.canvas.addEventListener('contextmenu', this.handleRightClick);
+
+    // 觸控事件
+    this.canvas.addEventListener('touchstart', this.handleTouchStart, { passive: false });
+    this.canvas.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+    this.canvas.addEventListener('touchend', this.handleTouchEnd);
   }
 
   /**
@@ -118,11 +124,72 @@ export class TrackEditor {
    */
   private getMousePosition(e: MouseEvent): Vector2D {
     const rect = this.canvas.getBoundingClientRect();
+    const scaleX = this.canvas.width / rect.width;
+    const scaleY = this.canvas.height / rect.height;
     return new Vector2D(
-      e.clientX - rect.left,
-      e.clientY - rect.top
+      (e.clientX - rect.left) * scaleX,
+      (e.clientY - rect.top) * scaleY
     );
   }
+
+  /**
+   * 取得觸控在 Canvas 上的位置
+   */
+  private getTouchPosition(touch: Touch): Vector2D {
+    const rect = this.canvas.getBoundingClientRect();
+    const scaleX = this.canvas.width / rect.width;
+    const scaleY = this.canvas.height / rect.height;
+    return new Vector2D(
+      (touch.clientX - rect.left) * scaleX,
+      (touch.clientY - rect.top) * scaleY
+    );
+  }
+
+  /**
+   * 觸控開始 - 新增點或開始拖曳
+   */
+  private handleTouchStart = (e: TouchEvent): void => {
+    if (!this.isActive) return;
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    const point = this.getTouchPosition(touch);
+    const nearestIndex = this.track.findNearestPoint(point, this.pointRadius * 3);
+
+    if (nearestIndex >= 0) {
+      // 拖曳已存在的點
+      this.isDragging = true;
+      this.dragPointIndex = nearestIndex;
+    } else {
+      // 新增控制點
+      this.track.addPoint(point);
+      this.onChangeCallback?.();
+    }
+  };
+
+  /**
+   * 觸控移動 - 拖曳控制點
+   */
+  private handleTouchMove = (e: TouchEvent): void => {
+    if (!this.isActive || !this.isDragging) return;
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    const point = this.getTouchPosition(touch);
+
+    if (this.dragPointIndex >= 0) {
+      this.track.movePoint(this.dragPointIndex, point);
+      this.onChangeCallback?.();
+    }
+  };
+
+  /**
+   * 觸控結束 - 結束拖曳
+   */
+  private handleTouchEnd = (): void => {
+    this.isDragging = false;
+    this.dragPointIndex = -1;
+  };
 
   /**
    * 啟動編輯器

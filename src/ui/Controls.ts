@@ -6,19 +6,22 @@ import { State } from '../core/GameState';
 export class Controls {
   private startBtn: HTMLButtonElement;
   private resetBtn: HTMLButtonElement;
+  private undoBtn: HTMLButtonElement;
 
   private onStartCallback: (() => void) | null = null;
   private onResetCallback: (() => void) | null = null;
+  private onUndoCallback: (() => void) | null = null;
 
   constructor() {
     this.startBtn = document.getElementById('start-btn') as HTMLButtonElement;
     this.resetBtn = document.getElementById('reset-btn') as HTMLButtonElement;
+    this.undoBtn = document.getElementById('undo-btn') as HTMLButtonElement;
 
     this.setupEvents();
   }
 
   /**
-   * 設定事件監聽
+   * 設定事件監聯
    */
   private setupEvents(): void {
     this.startBtn.addEventListener('click', () => {
@@ -27,6 +30,10 @@ export class Controls {
 
     this.resetBtn.addEventListener('click', () => {
       this.onResetCallback?.();
+    });
+
+    this.undoBtn.addEventListener('click', () => {
+      this.onUndoCallback?.();
     });
   }
 
@@ -45,6 +52,13 @@ export class Controls {
   }
 
   /**
+   * 設定撤銷按鈕回呼
+   */
+  onUndo(callback: () => void): void {
+    this.onUndoCallback = callback;
+  }
+
+  /**
    * 啟用/停用開始按鈕
    */
   setStartEnabled(enabled: boolean): void {
@@ -57,12 +71,14 @@ export class Controls {
   updateForState(state: State): void {
     switch (state) {
       case State.SELECTING:
+        this.undoBtn.style.display = 'none';
         this.startBtn.style.display = 'inline-block';
         this.startBtn.textContent = '開始模擬';
         this.resetBtn.style.display = 'none';
         break;
 
       case State.EDITING:
+        this.undoBtn.style.display = 'inline-block';
         this.startBtn.style.display = 'inline-block';
         this.startBtn.textContent = '開始模擬';
         this.resetBtn.style.display = 'inline-block';
@@ -70,11 +86,13 @@ export class Controls {
         break;
 
       case State.SIMULATING:
+        this.undoBtn.style.display = 'none';
         this.startBtn.style.display = 'none';
         this.resetBtn.style.display = 'none';
         break;
 
       case State.FINISHED:
+        this.undoBtn.style.display = 'none';
         this.startBtn.style.display = 'none';
         this.resetBtn.style.display = 'inline-block';
         break;
