@@ -261,6 +261,11 @@ function replay(): void {
   audioManager.stopRolling();
   renderer.getParticleSystem().clear();
 
+  // 重置停止檢測和迴圈檢測
+  stoppedFrames = 0;
+  lastCurvature = 0;
+  inLoop = false;
+
   // 保留 currentTrack 和 collectionBox，直接重新開始模擬
   startSimulation();
 }
