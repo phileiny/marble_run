@@ -293,8 +293,8 @@ function update(dt: number): void {
   }
   lastCurvature = curvature;
 
-  // 檢查是否停止移動
-  if (physics.isStopped(marble.getSpeed())) {
+  // 檢查是否停止移動（只有在彈珠移動過一段距離後才檢測）
+  if (marble.getT() > 0.05 && physics.isStopped(marble.getSpeed())) {
     stoppedFrames++;
     if (stoppedFrames >= STOPPED_THRESHOLD) {
       finishSimulation(false);

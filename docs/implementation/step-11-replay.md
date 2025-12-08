@@ -90,8 +90,30 @@ function replay(): void {
 
 ## Bug 修復
 
+### Bug 1：stoppedFrames 未重置
+
 原本 replay 後會立即顯示失敗，原因是 `stoppedFrames` 沒有重置。
 
 模擬結束時 `stoppedFrames >= 60`，replay 後第一幀就觸發 `finishSimulation(false)`。
 
 修復：在 replay() 中重置 `stoppedFrames = 0`。
+
+### Bug 2：GameState 狀態轉換限制
+
+`GameState.startSimulation()` 只允許從 `SELECTING` 或 `EDITING` 狀態轉換到 `SIMULATING`。
+
+當從 `FINISHED` 狀態呼叫 replay() 時，`startSimulation()` 無法轉換狀態，導致引擎不會呼叫 `updateCallback`。
+
+修復：在 `GameState.startSimulation()` 中加入 `FINISHED` 狀態的判斷：
+
+```typescript
+startSimulation(): void {
+  if (this.selectedTrack && (
+    this.currentState === State.SELECTING ||
+    this.currentState === State.EDITING ||
+    this.currentState === State.FINISHED  // 新增
+  )) {
+    this.transition(State.SIMULATING);
+  }
+}
+```

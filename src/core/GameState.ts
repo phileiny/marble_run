@@ -45,7 +45,7 @@ export class GameState {
 
   /** 開始模擬 */
   startSimulation(): void {
-    if (this.selectedTrack && (this.currentState === State.SELECTING || this.currentState === State.EDITING)) {
+    if (this.selectedTrack && (this.currentState === State.SELECTING || this.currentState === State.EDITING || this.currentState === State.FINISHED)) {
       this.transition(State.SIMULATING);
     }
   }

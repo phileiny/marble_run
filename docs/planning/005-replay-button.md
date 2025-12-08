@@ -37,6 +37,12 @@
 
 否則會因為舊的停止計數導致立即觸發失敗。
 
+### 重要：GameState 狀態轉換
+
+`GameState.startSimulation()` 必須允許從 `FINISHED` 狀態轉換到 `SIMULATING`。
+
+否則 replay 時狀態機無法轉換，引擎不會執行更新回呼。
+
 ## 修改檔案
 
 | 檔案 | 修改內容 |
@@ -45,3 +51,4 @@
 | Controls.ts | 新增 onReplay、updateForState 參數 |
 | main.ts | 新增 isCustomTrack、replay() |
 | style.css | replay-btn 樣式 |
+| GameState.ts | startSimulation 加入 FINISHED 狀態判斷 |
