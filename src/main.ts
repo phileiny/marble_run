@@ -35,6 +35,9 @@ let currentTrack: Track | null = null;
 let marble: Marble | null = null;
 let collectionBox: CollectionBox | null = null;
 
+// 是否為自訂軌道
+let isCustomTrack = false;
+
 // 迴圈檢測（用於播放咻聲）
 let lastCurvature = 0;
 let inLoop = false;
@@ -77,6 +80,7 @@ function init(): void {
       gameState.finishEditing();
     }
 
+    isCustomTrack = false;
     gameState.selectTrack(type);
     controls.setStartEnabled(true);
     audioManager.playClick();
@@ -89,6 +93,7 @@ function init(): void {
 
   // 自訂軌道選擇事件
   trackSelector.onCustomSelect(() => {
+    isCustomTrack = true;
     audioManager.init();
     audioManager.playClick();
     startEditing();
@@ -129,9 +134,15 @@ function init(): void {
     reset();
   });
 
+  // 再玩一次按鈕事件（自訂軌道用同樣軌道重新模擬）
+  controls.onReplay(() => {
+    audioManager.playClick();
+    replay();
+  });
+
   // 遊戲狀態變化
   gameState.onStateChange((state) => {
-    controls.updateForState(state);
+    controls.updateForState(state, isCustomTrack);
 
     if (state === State.SELECTING) {
       trackSelector.show();
@@ -237,8 +248,21 @@ function reset(): void {
   trackEditor.reset();
   controls.setStartEnabled(false);
 
+  isCustomTrack = false;
   gameState.reset();
   renderWelcome();
+}
+
+/**
+ * 再玩一次（自訂軌道保留軌道重新模擬）
+ */
+function replay(): void {
+  marble = null;
+  audioManager.stopRolling();
+  renderer.getParticleSystem().clear();
+
+  // 保留 currentTrack 和 collectionBox，直接重新開始模擬
+  startSimulation();
 }
 
 /**
